@@ -27,7 +27,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DOCS = ROOT / "docs"
+STATIC = ROOT / "static"
 
 HOST = "127.0.0.1"
 PORT = 8766
@@ -106,18 +106,29 @@ class Handler(BaseHTTPRequestHandler):
       return
 
     rel = path.lstrip("/")
-    target = (DOCS / rel).resolve()
+    if rel.endswith(".html") or rel == "":
+      try:
+        from pages import render
+
+        html_text = render(rel or "index.html")
+      except Exception as exc:
+        self._send_bytes(500, str(exc).encode("utf-8"), "text/plain; charset=utf-8")
+        return
+      if html_text is not None:
+        self._send_bytes(200, inject_live(html_text.encode("utf-8")), "text/html; charset=utf-8")
+        return
+
+    target = (STATIC / rel).resolve()
     if target.is_dir():
       target = target / "index.html"
-    if not str(target).startswith(str(DOCS.resolve())) or not target.is_file():
+    if not str(target).startswith(str(STATIC.resolve())) or not target.is_file():
       self._send_json(404, {"ok": False, "error": "Not found"})
       return
     data = target.read_bytes()
-    if target.suffix.lower() == ".html":
-      data = inject_live(data)
-      ctype = "text/html; charset=utf-8"
-    elif target.suffix.lower() == ".css":
+    if target.suffix.lower() == ".css":
       ctype = "text/css; charset=utf-8"
+    elif target.suffix.lower() == ".js":
+      ctype = "text/javascript; charset=utf-8"
     else:
       ctype = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
     self._send_bytes(200, data, ctype)
@@ -138,10 +149,16 @@ def page_gen(page: str) -> str:
   with LOCK:
     mtimes = dict(STATE["mtimes"])
     boot = STATE["boot"]
-  keys = [rel]
-  keys.extend(key for key in mtimes if key.startswith("css/") or key.startswith("assets/"))
+  keys = ["site.json", "content/" + rel]
+  keys.extend(
+    key for key in mtimes
+    if key.startswith("static/css/") or key.startswith("static/assets/")
+  )
+  folder = str(Path(rel).parent.as_posix())
+  if rel.endswith("index.html"):
+    keys.extend(key for key in mtimes if key.startswith("content/" + folder + "/"))
   if rel == "index.html":
-    keys.append("shell.js")
+    keys.append("static/shell.js")
   parts = [str(boot)]
   for key in sorted(set(keys)):
     parts.append(f"{key}:{mtimes.get(key, 0)}")
@@ -160,22 +177,29 @@ def inject_live(data: bytes) -> bytes:
 
 def scan_docs() -> dict[str, int]:
   found = {}
-  if not DOCS.is_dir():
-    return found
-  root = DOCS.resolve()
-  for path in DOCS.rglob("*"):
-    if not path.is_file():
-      continue
-    try:
-      key = path.resolve().relative_to(root).as_posix()
-      found[key] = path.stat().st_mtime_ns
-    except OSError:
-      continue
+
+  def add_tree(root: Path, prefix: str) -> None:
+    if not root.exists():
+      return
+    if root.is_file():
+      found[prefix] = root.stat().st_mtime_ns
+      return
+    for path in root.rglob("*"):
+      if not path.is_file():
+        continue
+      try:
+        found[prefix + path.relative_to(root).as_posix()] = path.stat().st_mtime_ns
+      except OSError:
+        continue
+
+  add_tree(ROOT / "content", "content/")
+  add_tree(STATIC, "static/")
+  add_tree(ROOT / "site.json", "site.json")
   return found
 
 
 def python_stamp() -> tuple[tuple[str, int], ...]:
-  paths = [ROOT / "serve.py"]
+  paths = [ROOT / "serve.py", ROOT / "pages.py"]
   scripts = ROOT / "scripts"
   if scripts.is_dir():
     paths.extend(scripts.rglob("*.py"))
@@ -211,8 +235,8 @@ def watch(server: Server, reload_flag: list[bool]) -> None:
 
 
 def serve(args) -> None:
-  if not (DOCS / "index.html").is_file():
-    raise SystemExit(f"Missing welcome page: {DOCS / 'index.html'}")
+  if not (ROOT / "site.json").is_file():
+    raise SystemExit(f"Missing catalog: {ROOT / 'site.json'}")
 
   with LOCK:
     STATE["mtimes"] = scan_docs()
@@ -253,8 +277,8 @@ def main(argv: list[str] | None = None) -> None:
     serve(args)
     return
 
-  if not (DOCS / "index.html").is_file():
-    raise SystemExit(f"Missing welcome page: {DOCS / 'index.html'}")
+  if not (ROOT / "site.json").is_file():
+    raise SystemExit(f"Missing catalog: {ROOT / 'site.json'}")
 
   url = f"http://{args.host}:{args.port}/"
   if not args.no_browser:

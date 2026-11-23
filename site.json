@@ -1,0 +1,135 @@
+{
+  "title": "Self Knowledge · Pyramid Spiritual Societies Movement",
+  "brand": "Self Knowledge",
+  "logo": "assets/pssm-logo.png",
+  "languages": [
+    {"id": "en", "label": "English", "suffix": ""},
+    {"id": "te", "label": "తెలుగు", "suffix": "-te"},
+    {"id": "kn", "label": "ಕನ್ನಡ", "suffix": "-kn"}
+  ],
+  "chrome": {
+    "anapanasati": {
+      "image": "assets/spiritual-seed.jpg",
+      "alt": "Spiritual Seed · Priyanka",
+      "intro": "readings/9-day-anapanasati/_intro.html",
+      "index_title": "9-Day Anapanasati Meditation · Spiritual Seed",
+      "h1": "Programme",
+      "week_label": "The Nine Days",
+      "youtube": "https://www.youtube.com/@spiritualseed",
+      "youtube_label": "YouTube: @spiritualseed",
+      "by": {
+        "en": {
+          "series_title": "9-Day Anapanasati Meditation",
+          "series_by": "Spiritual Seed · Priyanka",
+          "author_name": "Spiritual Seed · Priyanka",
+          "author_detail": "Anapanasati under Bramharshi Premnath Sir · since 2016 · PSSM",
+          "programme": "Programme",
+          "footer": "9-Day Anapanasati Meditation · Spiritual Seed · Priyanka",
+          "day": "Day",
+          "prev_first": "← Previous"
+        },
+        "te": {
+          "series_title": "9 రోజుల అనాపానసతి ధ్యానం",
+          "series_by": "Spiritual Seed · ప్రియాంక",
+          "author_name": "Spiritual Seed · ప్రియాంక",
+          "author_detail": "బ్రహ్మర్షి ప్రేమనాథ్ సార్ మార్గదర్శకత్వంలో అనాపానసతి · 2016 నుండి · PSSM",
+          "programme": "కార్యక్రమం",
+          "footer": "9 రోజుల అనాపానసతి ధ్యానం · Spiritual Seed · ప్రియాంక",
+          "day": "రోజు",
+          "prev_first": "← మునుపటి"
+        },
+        "kn": {
+          "series_title": "9 ದಿನಗಳ ಅನಾಪಾನಸತಿ ಧ್ಯಾನ",
+          "series_by": "Spiritual Seed · ಪ್ರಿಯಾಂಕ",
+          "author_name": "Spiritual Seed · ಪ್ರಿಯಾಂಕ",
+          "author_detail": "ಬ್ರಹ್ಮರ್ಷಿ ಪ್ರೇಮನಾಥ್ ಸರ್ ಮಾರ್ಗದರ್ಶನದಲ್ಲಿ ಅನಾಪಾನಸತಿ · 2016ರಿಂದ · PSSM",
+          "programme": "ಕಾರ್ಯಕ್ರಮ",
+          "footer": "9 ದಿನಗಳ ಅನಾಪಾನಸತಿ ಧ್ಯಾನ · Spiritual Seed · ಪ್ರಿಯಾಂಕ",
+          "day": "ದಿನ",
+          "prev_first": "← ಹಿಂದಿನದು"
+        }
+      }
+    },
+    "patriji": {
+      "image": "assets/patriji.jpg",
+      "alt": "Brahmarshi Patriji",
+      "by": {
+        "en": {
+          "series_title": "Brahmarshi Patriji",
+          "series_by": "Pyramid Spiritual Societies Movement",
+          "author_name": "Brahmarshi Patriji",
+          "author_detail": "Pyramid Spiritual Societies Movement",
+          "programme": "",
+          "footer": "",
+          "day": "Day",
+          "prev_first": "← Previous"
+        }
+      }
+    }
+  },
+  "sections": [
+    {
+      "id": "home",
+      "label": "Home",
+      "start": "readings/9-day-anapanasati/",
+      "groups": [
+        {
+          "author": "Priyanka · Spiritual Seed",
+          "series": {
+            "id": "series-anapanasati",
+            "title": "9-Day Anapanasati Meditation",
+            "href": "readings/9-day-anapanasati/",
+            "chrome": "anapanasati"
+          },
+          "articles": [
+            {"href": "readings/9-day-anapanasati/day-01.html", "label": "Day 1 · Introduction"},
+            {"href": "readings/9-day-anapanasati/day-02.html", "label": "Day 2 · The Six Laws"},
+            {"href": "readings/9-day-anapanasati/day-03.html", "label": "Day 3 · Patanjali Yoga Shastra"},
+            {"href": "readings/9-day-anapanasati/day-04.html", "label": "Day 4 · Jnana Navaratnas"},
+            {"href": "readings/9-day-anapanasati/day-05.html", "label": "Day 5 · Karma Siddhanta"},
+            {"href": "readings/9-day-anapanasati/day-06.html", "label": "Day 6 · Forgiveness"},
+            {"href": "readings/9-day-anapanasati/day-07.html", "label": "Day 7 · Experiences"},
+            {"href": "readings/9-day-anapanasati/day-08.html", "label": "Day 8 · Self-Love"},
+            {"href": "readings/9-day-anapanasati/day-09.html", "label": "Day 9 · Closing"},
+            {"href": "readings/9-day-anapanasati/vegetarian-living.html", "label": "Vegetarian living"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patriji",
+      "label": "Brahmarshi Patriji",
+      "start": "readings/brahmarshi-patriji/",
+      "hub_title": "Brahmarshi Patriji",
+      "hub_lede": "Readings from Brahmarshi Patriji, kept close to the spoken word.",
+      "groups": [
+        {
+          "author": "Brahmarshi Patriji",
+          "articles": [
+            {"href": "readings/brahmarshi-patriji/cosmic-energy.html", "label": "Cosmic Energy"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "newton",
+      "label": "Dr. Newton Kondaveti",
+      "start": "readings/dr-newton-kondaveti/",
+      "hub_title": "Dr. Newton Kondaveti",
+      "hub_lede": "Readings from Dr. Newton Kondaveti will be listed here, by article, in the left menu.",
+      "groups": [
+        {"author": "Dr. Newton Kondaveti", "articles": []}
+      ]
+    },
+    {
+      "id": "lakshmi",
+      "label": "Dr. Lakshmi Newton",
+      "start": "readings/dr-lakshmi-newton/",
+      "hub_title": "Dr. Lakshmi Newton",
+      "hub_lede": "Readings from Dr. Lakshmi Newton will be listed here, by article, in the left menu.",
+      "groups": [
+        {"author": "Dr. Lakshmi Newton", "articles": []}
+      ]
+    }
+  ]
+}
