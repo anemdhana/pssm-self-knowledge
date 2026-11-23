@@ -63,6 +63,16 @@
           "footer": "",
           "day": "Day",
           "prev_first": "← Previous"
+        },
+        "te": {
+          "series_title": "బ్రహ్మర్షి పత్రిజీ",
+          "series_by": "పిరమిడ్ స్పిరిచువల్ సొసైటీస్ మూవ్‌మెంట్",
+          "author_name": "బ్రహ్మర్షి పత్రిజీ",
+          "author_detail": "పిరమిడ్ స్పిరిచువల్ సొసైటీస్ మూవ్‌మెంట్",
+          "programme": "",
+          "footer": "",
+          "day": "రోజు",
+          "prev_first": "← మునుపటి"
         }
       }
     }

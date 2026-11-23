@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -303,7 +304,7 @@ def _reading(page: dict, catalog: dict) -> str:
       <div class="author-info">
         <strong>{_esc(voice["author_name"])}</strong>
         <span>{_esc(voice["author_detail"])}</span>
-      </div>
+      </div>{_reading_lang_nav(meta, catalog, folder)}
     </div>{eyebrow}
     <h1>{_esc(meta["h1"])}</h1>
     {page["body"]}
@@ -314,6 +315,27 @@ def _reading(page: dict, catalog: dict) -> str:
     if footer:
         parts.append(footer.lstrip("\n"))
     return _document(lang, meta.get("title") or meta["h1"], prefix, "\n".join(parts))
+
+
+def _reading_lang_nav(meta: dict, catalog: dict, folder: str) -> str:
+    """Language switch for a single reading. Day pages keep their own header links."""
+    if meta.get("day"):
+        return ""
+    stem = re.sub(r"-(te|kn)$", "", Path(meta["rel"]).stem)
+    current = meta.get("lang") or "en"
+    anchors = []
+    for item in catalog["languages"]:
+        name = f"{stem}{item['suffix']}.html"
+        if not _exists(f"{folder}/{name}"):
+            continue
+        mark = ' aria-current="page"' if item["id"] == current else ""
+        anchors.append(f'<a href="{_esc(name)}"{mark}>{_esc(item["label"])}</a>')
+    if len(anchors) < 2:
+        return ""
+    return f"""
+      <nav aria-label="Language">
+        {"\n        ".join(anchors)}
+      </nav>"""
 
 
 def _lang_links(meta: dict, catalog: dict, folder: str) -> list[tuple[str, str]]:

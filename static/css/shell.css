@@ -208,6 +208,17 @@ body.in-pane .author-row {
   margin-bottom: 8px;
 }
 
+.author-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.author-row nav a[aria-current="page"] {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 
 body.in-pane .author-info strong {
   font-size: 15px;
