@@ -75,6 +75,32 @@
           "prev_first": "← మునుపటి"
         }
       }
+    },
+    "lakshmi": {
+      "image": "assets/dr-lakshmi.png",
+      "alt": "Dr. Lakshmi Newton",
+      "by": {
+        "en": {
+          "series_title": "Dr. Lakshmi Newton",
+          "series_by": "Quantum Life University",
+          "author_name": "Dr. Lakshmi Newton",
+          "author_detail": "Quantum Life University",
+          "programme": "",
+          "footer": "",
+          "day": "Day",
+          "prev_first": "← Previous"
+        },
+        "te": {
+          "series_title": "డాక్టర్ లక్ష్మీ న్యూటన్",
+          "series_by": "క్వాంటం లైఫ్ యూనివర్సిటీ",
+          "author_name": "డాక్టర్ లక్ష్మీ న్యూటన్",
+          "author_detail": "క్వాంటం లైఫ్ యూనివర్సిటీ",
+          "programme": "",
+          "footer": "",
+          "day": "రోజు",
+          "prev_first": "← మునుపటి"
+        }
+      }
     }
   },
   "sections": [
@@ -122,23 +148,40 @@
       ]
     },
     {
-      "id": "newton",
-      "label": "Dr. Newton Kondaveti",
-      "start": "readings/dr-newton-kondaveti/",
-      "hub_title": "Dr. Newton Kondaveti",
-      "hub_lede": "Readings from Dr. Newton Kondaveti will be listed here, by article, in the left menu.",
+      "id": "qlu",
+      "label": "Quantum Life University",
+      "start": "readings/quantum-life-university/",
+      "hub_title": "Quantum Life University",
+      "hub_lede": "Talks from Quantum Life University, listed by speaker and the day they were given.",
       "groups": [
-        {"author": "Dr. Newton Kondaveti", "articles": []}
+        {
+          "author": "Dr. Lakshmi Newton",
+          "date": "24 November 2026 · Kartika Purnima",
+          "articles": [
+            {
+              "href": "readings/dr-lakshmi-newton/newsletter-blurb-te.html",
+              "label": "Birthday speech",
+              "also": ["readings/dr-lakshmi-newton/birthday-speech.html"]
+            }
+          ]
+        },
+        {
+          "author": "Dr. Newton Kondaveti",
+          "articles": []
+        }
       ]
     },
     {
-      "id": "lakshmi",
-      "label": "Dr. Lakshmi Newton",
-      "start": "readings/dr-lakshmi-newton/",
-      "hub_title": "Dr. Lakshmi Newton",
-      "hub_lede": "Readings from Dr. Lakshmi Newton will be listed here, by article, in the left menu.",
+      "id": "tools",
+      "label": "Tools",
+      "start": "tools/",
       "groups": [
-        {"author": "Dr. Lakshmi Newton", "articles": []}
+        {
+          "author": "Reading tools",
+          "articles": [
+            {"href": "tools/", "label": "Beautify Markdown"}
+          ]
+        }
       ]
     }
   ]

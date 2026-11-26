@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import shutil
 from pathlib import Path
@@ -108,6 +109,8 @@ def render(rel: str) -> str | None:
     if page:
         return _reading(page, catalog)
     section = _section_for(rel, catalog)
+    if section and section.get("id") == "tools":
+        return _tools(rel)
     if section:
         return _hub(rel, catalog, section)
     return None
@@ -179,27 +182,24 @@ def _shell(catalog: dict) -> str:
         hidden = "" if index == 0 else " hidden"
         blocks = []
         for group in section["groups"]:
-            blocks.append(f'<p class="nav-author">{_esc(group["author"])}</p>')
+            parts = [f'<p class="nav-author">{_esc(group["author"])}</p>']
+            if group.get("date"):
+                parts.append(f'<p class="nav-date">{_esc(group["date"])}</p>')
             series = group.get("series")
             articles = group.get("articles") or []
             if series:
-                blocks.append(
+                parts.append(
                     '<button class="nav-series" type="button" aria-expanded="true" '
                     f'aria-controls="{_esc(series["id"])}" data-href="{_esc(series["href"])}">'
                     f'{_esc(series["title"])}</button>'
                 )
-                links = "\n".join(
-                    f'<a class="nav-article" href="{_esc(article["href"])}">{_esc(article["label"])}</a>'
-                    for article in articles
-                )
-                blocks.append(f'<div class="nav-days is-open" id="{_esc(series["id"])}">\n{links}\n</div>')
+                links = "\n".join(_nav_article(article) for article in articles)
+                parts.append(f'<div class="nav-days is-open" id="{_esc(series["id"])}">\n{links}\n</div>')
             elif articles:
-                blocks.extend(
-                    f'<a class="nav-article" href="{_esc(article["href"])}">{_esc(article["label"])}</a>'
-                    for article in articles
-                )
+                parts.extend(_nav_article(article) for article in articles)
             else:
-                blocks.append('<p class="nav-empty">Articles will appear here.</p>')
+                parts.append('<p class="nav-empty">Articles will appear here.</p>')
+            blocks.append('<div class="nav-group">\n' + "\n".join(parts) + "\n</div>")
         navs.append(
             f'<nav class="shell-nav" data-section="{_esc(section["id"])}" aria-label="Articles by author"{hidden}>\n'
             + "\n".join(blocks)
@@ -296,6 +296,7 @@ def _reading(page: dict, catalog: dict) -> str:
     if meta.get("day"):
         parts.append(_day_strip(meta, catalog, folder))
     eyebrow = f'\n    <p class="eyebrow">{_esc(meta["eyebrow"])}</p>' if meta.get("eyebrow") else ""
+    when = f'\n    <p class="reading-date">{_esc(meta["date"])}</p>' if meta.get("date") else ""
     footer = f'\n    <footer class="site-footer">{_esc(voice["footer"])}</footer>' if voice.get("footer") else ""
     parts.append(
         f"""    <article class="post-card">
@@ -305,7 +306,7 @@ def _reading(page: dict, catalog: dict) -> str:
         <strong>{_esc(voice["author_name"])}</strong>
         <span>{_esc(voice["author_detail"])}</span>
       </div>{_reading_lang_nav(meta, catalog, folder)}
-    </div>{eyebrow}
+    </div>{when}{eyebrow}
     <h1>{_esc(meta["h1"])}</h1>
     {page["body"]}
     </article>"""
@@ -444,14 +445,109 @@ def _series(rel: str, catalog: dict, series: dict) -> str:
     return _document("en", block.get("index_title") or voice["series_title"], prefix, inner)
 
 
+def _tools(rel: str) -> str:
+    prefix = _prefix(rel)
+    inner = """    <div class="hub-card">
+      <h1>Beautify a reading</h1>
+      <p class="lede">Upload a Markdown file. A free Gemini model adds commas, full stops, quotation marks, and paragraph breaks, then this page downloads an HTML file in the parchment reading style.</p>
+      <form class="tool-form" id="beautify">
+        <label for="md-file">Markdown file</label>
+        <input id="md-file" name="markdown" type="file" accept=".md,text/markdown">
+        <button type="submit">Prepare HTML</button>
+        <p class="tool-status" id="tool-status" role="status"></p>
+      </form>
+    </div>
+    <script>
+    (function () {
+      var form = document.getElementById("beautify");
+      var status = document.getElementById("tool-status");
+      var fileInput = document.getElementById("md-file");
+      var button = form.querySelector("button");
+      function setStatus(message, isError) {
+        status.textContent = message;
+        status.className = "tool-status" + (isError ? " is-error" : "");
+      }
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) {
+          setStatus("Choose a Markdown file.", true);
+          return;
+        }
+        if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
+          setStatus("Open Tools from the local reader at http://127.0.0.1:8766/#tools", true);
+          return;
+        }
+        button.disabled = true;
+        setStatus("Preparing the reading…", false);
+        file.text().then(function (text) {
+          return fetch("/api/beautify?name=" + encodeURIComponent(file.name), {
+            method: "POST",
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+            body: text
+          });
+        }).then(function (response) {
+          var type = response.headers.get("Content-Type") || "";
+          if (!response.ok || type.indexOf("text/html") === -1) {
+            return response.json().then(function (data) {
+              throw new Error((data && data.error) || "Could not prepare the reading.");
+            });
+          }
+          var download = file.name.replace(/\\.md$/i, "") || "reading";
+          if (!/\\.html$/i.test(download)) download += ".html";
+          return response.blob().then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = download;
+            link.click();
+            URL.revokeObjectURL(url);
+            setStatus("Downloaded " + download + ".", false);
+          });
+        }).catch(function (error) {
+          setStatus(error.message || "Could not prepare the reading.", true);
+        }).then(function () {
+          button.disabled = false;
+        });
+      });
+    })();
+    </script>"""
+    return _document("en", "Tools · Self Knowledge", prefix, inner)
+
+
+def _nav_article(article: dict) -> str:
+    also = article.get("also") or []
+    extra = f' data-also="{_esc(" ".join(also))}"' if also else ""
+    return (
+        f'<a class="nav-article" href="{_esc(article["href"])}"{extra}>'
+        f'{_esc(article["label"])}</a>'
+    )
+
+
+def _article_href(from_rel: str, href: str) -> str:
+    return Path(os.path.relpath(href, Path(from_rel).parent)).as_posix()
+
+
 def _hub(rel: str, catalog: dict, section: dict) -> str:
     prefix = _prefix(rel)
-    links = []
+    groups = []
     for group in section["groups"]:
-        for article in group.get("articles") or []:
-            href = Path(article["href"]).name
-            links.append(f'<p><a href="{_esc(href)}">{_esc(article["label"])}</a></p>')
-    listing = "\n      ".join(links)
+        date = f'\n      <p class="reading-date">{_esc(group["date"])}</p>' if group.get("date") else ""
+        articles = group.get("articles") or []
+        if articles:
+            links = "\n".join(
+                f'      <p><a href="{_esc(_article_href(rel, article["href"]))}">{_esc(article["label"])}</a></p>'
+                for article in articles
+            )
+        else:
+            links = '      <p class="nav-empty">Articles will appear here.</p>'
+        groups.append(
+            f"""    <section class="reading-group">
+      <h2>{_esc(group["author"])}</h2>{date}
+{links}
+    </section>"""
+        )
+    listing = "\n".join(groups)
     inner = f"""    <div class="hub-card">
       <h1>{_esc(section.get("hub_title") or section["label"])}</h1>
       <p class="lede">{_esc(section.get("hub_lede") or "")}</p>

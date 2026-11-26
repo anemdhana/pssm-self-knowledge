@@ -133,6 +133,40 @@ class Handler(BaseHTTPRequestHandler):
       ctype = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
     self._send_bytes(200, data, ctype)
 
+  def do_POST(self) -> None:
+    parsed = urllib.parse.urlparse(self.path)
+    if parsed.path != "/api/beautify":
+      self._send_json(404, {"ok": False, "error": "Not found"})
+      return
+    length = int(self.headers.get("Content-Length") or "0")
+    if length <= 0 or length > 1_500_000:
+      self._send_json(413, {"ok": False, "error": "The Markdown file is empty or too large."})
+      return
+    raw = self.rfile.read(length)
+    name = urllib.parse.parse_qs(parsed.query).get("name", ["reading.md"])[0]
+    try:
+      text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+      self._send_json(400, {"ok": False, "error": "The file must be UTF-8 text."})
+      return
+    scripts = str(ROOT / "scripts")
+    if scripts not in sys.path:
+      sys.path.insert(0, scripts)
+    from beautify_reading import BeautifyError, beautify_markdown
+
+    try:
+      page = beautify_markdown(text, source_name=name or "reading.md")
+    except BeautifyError as exc:
+      self._send_json(400, {"ok": False, "error": str(exc)})
+      return
+    data = page.encode("utf-8")
+    self.send_response(200)
+    self.send_header("Content-Type", "text/html; charset=utf-8")
+    self.send_header("Content-Length", str(len(data)))
+    self.send_header("Cache-Control", "no-store")
+    self.end_headers()
+    self.wfile.write(data)
+
 
 def normalize_page(page: str) -> str:
   page = urllib.parse.unquote(page.split("?", 1)[0].split("#", 1)[0])

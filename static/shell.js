@@ -16,12 +16,19 @@
     return clean.replace(/-(te|kn)(?=\.html$)/, "");
   }
 
+  function samePath(href, current) {
+    return normalize(new URL(href, location.href).pathname) === current;
+  }
+
   function mark(path) {
     var current = normalize(path);
     document.querySelectorAll(".nav-article, .nav-series").forEach(function (link) {
       var href = link.getAttribute("href") || link.getAttribute("data-href");
       if (!href) return;
-      var same = normalize(new URL(href, location.href).pathname) === current;
+      var extra = (link.getAttribute("data-also") || "").split(/\s+/).filter(Boolean);
+      var same = samePath(href, current) || extra.some(function (item) {
+        return samePath(item, current);
+      });
       if (same) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     });
