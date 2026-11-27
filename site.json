@@ -101,6 +101,32 @@
           "prev_first": "← మునుపటి"
         }
       }
+    },
+    "newton": {
+      "image": "assets/dr-newton.jpg",
+      "alt": "Dr. Newton Kondaveti",
+      "by": {
+        "en": {
+          "series_title": "Dr. Newton Kondaveti",
+          "series_by": "Quantum Life University",
+          "author_name": "Dr. Newton Kondaveti",
+          "author_detail": "Quantum Life University",
+          "programme": "",
+          "footer": "",
+          "day": "Day",
+          "prev_first": "← Previous"
+        },
+        "te": {
+          "series_title": "డాక్టర్ న్యూటన్ కొండవీటి",
+          "series_by": "క్వాంటం లైఫ్ యూనివర్సిటీ",
+          "author_name": "డాక్టర్ న్యూటన్ కొండవీటి",
+          "author_detail": "క్వాంటం లైఫ్ యూనివర్సిటీ",
+          "programme": "",
+          "footer": "",
+          "day": "రోజు",
+          "prev_first": "← మునుపటి"
+        }
+      }
     }
   },
   "sections": [
@@ -159,15 +185,42 @@
           "date": "24 November 2026 · Kartika Purnima",
           "articles": [
             {
-              "href": "readings/dr-lakshmi-newton/newsletter-blurb-te.html",
+              "href": "readings/dr-lakshmi-newton/birthday-speech-blurb-te.html",
               "label": "Birthday speech",
-              "also": ["readings/dr-lakshmi-newton/birthday-speech.html"]
+              "also": [
+                "readings/dr-lakshmi-newton/birthday-speech.html",
+                "readings/dr-lakshmi-newton/birthday-speech-blurb-en.html"
+              ]
             }
           ]
         },
         {
           "author": "Dr. Newton Kondaveti",
-          "articles": []
+          "date": "19 November 2026",
+          "articles": [
+            {
+              "href": "readings/dr-newton-kondaveti/rama-karyam-blurb.html",
+              "label": "Rama Karyam",
+              "also": [
+                "readings/dr-newton-kondaveti/rama-karyam.html",
+                "readings/dr-newton-kondaveti/rama-karyam-en.html"
+              ]
+            }
+          ]
+        },
+        {
+          "author": "Dr. Newton Kondaveti",
+          "date": "24 November 2026 · Kartika Purnima",
+          "articles": [
+            {
+              "href": "readings/dr-newton-kondaveti/birthday-speech-blurb-te.html",
+              "label": "Birthday speech",
+              "also": [
+                "readings/dr-newton-kondaveti/birthday-speech.html",
+                "readings/dr-newton-kondaveti/birthday-speech-blurb-en.html"
+              ]
+            }
+          ]
         }
       ]
     },

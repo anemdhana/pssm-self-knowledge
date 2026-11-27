@@ -111,6 +111,36 @@ def format_date(value: date) -> str:
     return f"{value.day} {calendar.month_name[value.month]} {value.year}"
 
 
+def date_line(value: date, note: str = "") -> str:
+    label = format_date(value)
+    note = note.strip(" ·-")
+    if note:
+        return f"{label} · {note}"
+    return label
+
+
+def split_date_arg(text: str) -> tuple[date, str]:
+    parsed = parse_date(text)
+    if parsed is None:
+        try:
+            parsed = datetime.strptime(text[:10], "%Y-%m-%d").date()
+        except ValueError:
+            parsed = None
+    if parsed is None:
+        raise ArticleError(f"Could not read this date: {text}")
+    note = text
+    for pattern in (
+        r"\b\d{4}-\d{2}-\d{2}\b",
+        rf"\b\d{{1,2}}\s+(?:{MONTH_PATTERN})\.?\s+\d{{4}}\b",
+        rf"\b(?:{MONTH_PATTERN})\.?\s+\d{{1,2}},?\s+\d{{4}}\b",
+        r"\b\d{1,2}[./-]\d{1,2}[./-]\d{4}\b",
+    ):
+        note, count = re.subn(pattern, " ", note, count=1, flags=re.I)
+        if count:
+            break
+    return parsed, note.strip(" ·-")
+
+
 def _safe_date(year: int, month: int, day: int) -> date | None:
     try:
         return date(year, month, day)
@@ -210,6 +240,7 @@ def _take_h1(fragment: str) -> tuple[str, str]:
         return "", fragment.strip()
     title = clean_title(_plain(found.group(1)))
     body = (fragment[:found.start()] + fragment[found.end():]).strip()
+    body = re.sub(r"^</h1>\s*", "", body)
     return title, body
 
 
@@ -266,7 +297,9 @@ def article_from_html(
     today: date | None = None,
     author: str | None = None,
     on_date: date | None = None,
+    date_note: str = "",
     chrome: str | None = None,
+    title: str | None = None,
 ) -> dict:
     text = raw.replace("\r\n", "\n").replace("\r", "\n").strip()
     if not text:
@@ -283,20 +316,22 @@ def article_from_html(
         raise ArticleError(str(exc)) from exc
     fragment = _drop_word_counts(fragment)
     heading, body = _take_h1(fragment)
-    title = clean_title(str(meta.get("h1") or heading or _source_title(raw)))
-    if not title:
-        title = clean_title(Path(source_name).stem.replace("-", " ").replace("_", " "))
-    if not title:
+    chosen_title = clean_title(title or "") if title else ""
+    if not chosen_title:
+        chosen_title = clean_title(str(meta.get("h1") or heading or _source_title(raw)))
+    if not chosen_title:
+        chosen_title = clean_title(Path(source_name).stem.replace("-", " ").replace("_", " "))
+    if not chosen_title:
         raise ArticleError("This HTML has no title.")
     lifted, body = _lift_date_paragraph(body)
-    chosen = on_date or _source_date(raw) or parse_date(str(meta.get("date") or "")) or lifted or parse_date(title)
+    chosen = on_date or _source_date(raw) or parse_date(str(meta.get("date") or "")) or lifted or parse_date(chosen_title)
     if chosen is None:
         chosen = today or date.today()
     spoken_by = (author or _source_author(raw) or str(meta.get("author") or "")).strip()
-    lang = str(meta.get("lang") or language_of(title + "\n" + body))
+    lang = str(meta.get("lang") or language_of(chosen_title + "\n" + body))
     return {
-        "title": title,
-        "date": format_date(chosen),
+        "title": chosen_title,
+        "date": date_line(chosen, date_note if on_date else ""),
         "author": spoken_by,
         "lang": lang,
         "chrome": (chrome or str(meta.get("chrome") or "")).strip(),
@@ -344,8 +379,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Turn HTML into an article reading")
     parser.add_argument("html", type=Path, help="Source HTML file")
     parser.add_argument("-o", "--output", type=Path, help="File to write (default: beside the HTML)")
-    parser.add_argument("--date", help="Date to use, such as 2026-11-24. Otherwise the HTML date, or today.")
+    parser.add_argument(
+        "--date",
+        help="Date to use, such as 2026-11-24 or 2026-11-24 · Kartika Purnima. Otherwise the HTML date, or today.",
+    )
     parser.add_argument("--author", help="Speaker name to show above the date")
+    parser.add_argument("--title", help="Reading title (otherwise taken from the HTML)")
     parser.add_argument("--fragment", action="store_true", help="Write a content fragment for this site")
     parser.add_argument("--chrome", help="Author chrome for a fragment, such as lakshmi or patriji")
     args = parser.parse_args(argv)
@@ -354,21 +393,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"No such file: {source}", file=sys.stderr)
         return 1
     chosen: date | None = None
+    note = ""
     if args.date:
-        chosen = parse_date(args.date)
-        if chosen is None:
-            try:
-                chosen = datetime.strptime(args.date, "%Y-%m-%d").date()
-            except ValueError:
-                print(f"Could not read this date: {args.date}", file=sys.stderr)
-                return 1
+        try:
+            chosen, note = split_date_arg(args.date)
+        except ArticleError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
     try:
         article = article_from_html(
             source.read_text(encoding="utf-8"),
             source.name,
             author=args.author,
             on_date=chosen,
+            date_note=note,
             chrome=args.chrome,
+            title=args.title,
         )
     except ArticleError as exc:
         print(str(exc), file=sys.stderr)

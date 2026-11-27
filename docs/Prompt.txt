@@ -1,0 +1,14 @@
+Prompt / Process Used
+Beautify the transcript without changing any original text.
+
+Only add full stops, commas, quotation marks, and other punctuation so it feels like a person is speaking naturally in front of me.
+
+Carefully follow the context, intention, and spiritual wisdom. Never alter the meaning or any words.
+
+Then create clean Markdown (.md) files optimized for a pleasant Kindle reading experience, with proper paragraph breaks.Additional variations used:
+Extract only a specific speaker’s speech (e.g., “grab only Lakshmi madam speech” or Dr. Newton’s birthday / Diwali message).
+Create a newsletter-style blurb (under ~800 words) that makes the reader excited about what happened in the speech, while staying true to the content.
+Provide the blurb / beautified reading in the chosen output language (original transcript language, English, or Hindi).
+Produce a full beautified transcript (entire spoken content with only punctuation added) when requested.
+Always preserve every original word exactly. Only punctuation and paragraph structure are added.
+This is the consistent method applied to all the files created so far (Rama Karyam, Lakshmi madam’s speech, Dr. Newton’s birthday speech, and the Diwali Jnanodayam session).

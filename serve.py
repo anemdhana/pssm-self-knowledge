@@ -37,7 +37,6 @@ STATE = {
   "mtimes": {},
   "boot": f"{time.time_ns():x}",
 }
-
 LIVE_SNIPPET = """<script>
 (function(){
   var page = location.pathname;
@@ -135,15 +134,47 @@ class Handler(BaseHTTPRequestHandler):
 
   def do_POST(self) -> None:
     parsed = urllib.parse.urlparse(self.path)
-    if parsed.path != "/api/beautify":
-      self._send_json(404, {"ok": False, "error": "Not found"})
+    if parsed.path == "/api/beautify":
+      self._post_beautify(parsed)
       return
+    self._send_json(404, {"ok": False, "error": "Not found"})
+
+  def _read_body(self, max_bytes: int = 1_500_000) -> bytes | None:
     length = int(self.headers.get("Content-Length") or "0")
-    if length <= 0 or length > 1_500_000:
-      self._send_json(413, {"ok": False, "error": "The Markdown file is empty or too large."})
+    if length <= 0 or length > max_bytes:
+      self._send_json(413, {"ok": False, "error": "The request body is empty or too large."})
+      return None
+    return self.rfile.read(length)
+
+  def _post_beautify(self, parsed: urllib.parse.ParseResult) -> None:
+    raw = self._read_body()
+    if raw is None:
       return
-    raw = self.rfile.read(length)
-    name = urllib.parse.parse_qs(parsed.query).get("name", ["reading.md"])[0]
+    query = urllib.parse.parse_qs(parsed.query)
+    name = query.get("name", ["reading.txt"])[0]
+    mode = (query.get("mode", ["beautify"])[0] or "beautify").strip().lower()
+    if mode not in ("format", "beautify"):
+      self._send_json(400, {"ok": False, "error": "Mode must be format or beautify."})
+      return
+    blurb = query.get("blurb", ["0"])[0].lower() in ("1", "true", "yes", "on")
+    if mode == "format":
+      blurb = False
+    speaker = (query.get("speaker", [""])[0] or "").strip()
+    lang_params = query.get("lang") or query.get("langs") or ["original"]
+    langs: list[str] = []
+    for item in lang_params:
+      for part in str(item).replace(";", ",").split(","):
+        part = part.strip().lower()
+        if part:
+          langs.append(part)
+    words_raw = (query.get("words", [""])[0] or "").strip()
+    word_limit = None
+    if mode == "beautify" and words_raw:
+      try:
+        word_limit = int(words_raw)
+      except ValueError:
+        self._send_json(400, {"ok": False, "error": "Word limit must be a whole number."})
+        return
     try:
       text = raw.decode("utf-8")
     except UnicodeDecodeError:
@@ -152,20 +183,34 @@ class Handler(BaseHTTPRequestHandler):
     scripts = str(ROOT / "scripts")
     if scripts not in sys.path:
       sys.path.insert(0, scripts)
-    from beautify_reading import BeautifyError, beautify_markdown
+    from beautify_reading import BeautifyError, beautify_downloads
 
     try:
-      page = beautify_markdown(text, source_name=name or "reading.md")
+      files = beautify_downloads(
+        text,
+        source_name=name or "reading.txt",
+        mode=mode,
+        blurb=blurb,
+        word_limit=word_limit,
+        speaker=speaker or None,
+        langs=langs,
+      )
     except BeautifyError as exc:
       self._send_json(400, {"ok": False, "error": str(exc)})
       return
-    data = page.encode("utf-8")
-    self.send_response(200)
-    self.send_header("Content-Type", "text/html; charset=utf-8")
-    self.send_header("Content-Length", str(len(data)))
-    self.send_header("Cache-Control", "no-store")
-    self.end_headers()
-    self.wfile.write(data)
+    first = files[0]
+    self._send_json(
+      200,
+      {
+        "ok": True,
+        "html": first["html"],
+        "filename": first["filename"],
+        "files": files,
+        "mode": mode,
+        "blurb": blurb,
+        "langs": [item["lang"] for item in files],
+      },
+    )
 
 
 def normalize_page(page: str) -> str:

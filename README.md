@@ -25,12 +25,16 @@ python serve.py
 
 ## Tools
 
-The top menu **Tools** page turns a Markdown file into a downloadable HTML reading. `scripts/beautify_reading.py` sends the text to the free Gemini model `gemini-3.5-flash-lite`, which adds punctuation, quotation marks, and paragraph breaks without adding ideas. The HTML uses the parchment colours and Georgia type so it can be sent to a Kindle.
+The top menu **Tools** page takes a YouTube captions **`.txt`** file. **Format the reading** keeps every original word (punctuation + paragraphs) and downloads one HTML file. **Beautify** shapes a pleasant full reading or newsletter blurb (word limit defaults 2500 / 450) and downloads one HTML file per checked output language: original transcript language (checked by default), English (`…-en.html`), and/or Hindi (`…-hi.html`). Optional **Speaker only** keeps one speaker from multi-speaker captions. Use `scripts/article_reading.py --fragment` later if you want a site fragment under `content/readings/`.
 
-Put a free key from [Google AI Studio](https://aistudio.google.com/apikey) in `.env` as `GEMINI_API_KEY`. The same command works in a terminal:
+Put a free key from [Google AI Studio](https://aistudio.google.com/apikey) in `.env` as `GEMINI_API_KEY`. The CLI still works:
 
 ```powershell
-python scripts/beautify_reading.py reading.md
+python scripts/beautify_reading.py captions.txt --mode format
+python scripts/beautify_reading.py captions.txt --mode beautify
+python scripts/beautify_reading.py captions.txt --mode beautify --lang en
+python scripts/beautify_reading.py captions.txt --mode beautify --lang hi
+python scripts/beautify_reading.py captions.txt --mode beautify --blurb --words 450
 ```
 
 This step runs on the local server. The published GitHub Pages site does not call the model.

@@ -105,6 +105,15 @@ body.shell {
   color: var(--ink-muted);
 }
 
+.nav-group .nav-date + .nav-article,
+.nav-group .nav-article + .nav-date {
+  margin-top: 10px;
+}
+
+.nav-group .nav-article + .nav-date {
+  margin-top: 12px;
+}
+
 .nav-group:has(.nav-date) .nav-article {
   margin-left: 8px;
 }
@@ -118,6 +127,11 @@ body.shell {
   font-size: 18px;
   font-weight: normal;
   color: var(--heading);
+}
+
+.reading-group .reading-date + p,
+.reading-group p + .reading-date {
+  margin-top: 0.85rem;
 }
 
 .reading-date {
@@ -146,6 +160,49 @@ body.shell {
 
 .post-card .read-more a::after {
   content: " →";
+}
+
+.post-card .occasion {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.post-card p.lead {
+  font-size: 16px;
+}
+
+.post-card .gratitude-box {
+  margin: 14px 0 16px;
+  padding: 12px 16px;
+  background: rgba(255, 248, 235, 0.95);
+  border: 1px solid rgba(186, 122, 58, 0.28);
+  border-radius: 12px;
+}
+
+.post-card .gratitude-box p {
+  margin: 0 0 12px;
+}
+
+.post-card .gratitude-box p:last-child {
+  margin-bottom: 0;
+}
+
+.post-card .divider {
+  margin: 18px 0;
+  text-align: center;
+  letter-spacing: 0.35em;
+  color: var(--accent);
+}
+
+.post-card .closing {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(186, 122, 58, 0.28);
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-muted);
 }
 
 .nav-series {
@@ -507,29 +564,131 @@ body.in-pane .site-header {
   color: var(--ink-muted);
 }
 
-.tool-form label {
+.tool-card {
+  padding: 1rem 1.1rem 1.15rem;
+}
+
+.tool-card h1 {
+  margin-bottom: 0.25rem;
+  font-size: 1.2rem;
+}
+
+.tool-card .lede {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+}
+
+.tool-form {
+  margin: 0;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.tool-field {
+  min-width: 0;
+}
+
+.tool-field--file,
+.tool-field--actions {
+  grid-column: 1 / -1;
+}
+
+.tool-form label,
+.tool-form legend {
   display: block;
-  margin: 16px 0 6px;
-  font-size: 14px;
+  margin: 0 0 0.3rem;
+  font-size: 13px;
   color: var(--heading);
 }
 
-.tool-form input {
+.tool-form input[type="text"],
+.tool-form input[type="number"],
+.tool-form input[type="file"],
+.tool-form select {
   box-sizing: border-box;
   width: 100%;
   font: inherit;
   font-size: 14px;
 }
 
+.tool-form fieldset.tool-langs {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.tool-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.9rem;
+}
+
+.tool-field--options {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.55rem 0.9rem;
+  align-items: end;
+}
+
+.tool-words label {
+  margin-bottom: 0.3rem;
+}
+
+.tool-form label.tool-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 13px;
+  font-weight: normal;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tool-form label.tool-check input {
+  width: auto;
+  margin: 0;
+}
+
+.tool-form input[type="number"] {
+  max-width: 8.5rem;
+}
+
+.tool-form .tool-hint {
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--ink-muted);
+}
+
+.tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.tool-form button.tool-secondary,
+.tool-actions button.tool-secondary {
+  background: transparent;
+  color: #2f241c;
+  border-color: rgba(47, 36, 28, 0.35);
+}
+
 .tool-form button {
-  margin-top: 16px;
+  margin: 0;
   border: 1px solid #2f241c;
   border-radius: 999px;
   background: #2f241c;
   color: #f7efe3;
   font: inherit;
-  font-size: 15px;
-  padding: 8px 16px;
+  font-size: 14px;
+  padding: 7px 14px;
   cursor: pointer;
 }
 
@@ -539,12 +698,19 @@ body.in-pane .site-header {
 }
 
 .tool-status {
-  min-height: 1.4em;
-  margin: 12px 0 0;
-  font-size: 14px;
+  min-height: 1.25em;
+  margin: 0.45rem 0 0;
+  font-size: 13px;
   color: var(--ink-muted);
 }
 
 .tool-status.is-error {
   color: #8a3a2b;
+}
+
+@media (max-width: 720px) {
+  .tool-grid,
+  .tool-field--options {
+    grid-template-columns: 1fr;
+  }
 }
